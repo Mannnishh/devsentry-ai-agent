@@ -65,9 +65,9 @@ Along the way, every day reinforces senior-level engineering practices:
 ## Day Files
 
 1. [Day 1 — Git Hygiene, Project Scaffolding & Free LLM Client](01-day1-git-and-free-tier-setup.md)
-2. Day 2 — The ReAct Reasoning Engine from Scratch
-3. Day 3 — Function Calling & Secure Tool Sandbox
-4. Day 4 — Working Memory & SQLite State Persistence
-5. Day 5 — Production Resilience & Self-Healing Loop
-6. Day 6 — Human-in-the-Loop & Safety Guardrails
-7. Day 7 — Streaming API, Docker & Interview Defense
+2. [Day 2 — The ReAct Reasoning Engine from Scratch](02-day2-react-engine-from-scratch.md)
+3. [Day 3 — Function Calling & Secure Tool Sandbox](03-day3-tools-and-sandboxing.md)
+4. [Day 4 — Working Memory, Scratchpad Compaction & SQLite Persistence](04-day4-memory-and-persistence.md)
+5. [Day 5 — Production Resilience, Rate Limiting & Self-Healing](05-day5-resilience-and-self-healing.md)
+6. [Day 6 — Human-in-the-Loop (HITL) & Safety Guardrails](06-day6-human-in-the-loop-safety.md)
+7. [Day 7 — Streaming REST API, Docker Packaging & Senior Interview Defense](07-day7-streaming-api-docker-interview.md)
