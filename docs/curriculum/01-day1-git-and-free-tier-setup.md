@@ -48,6 +48,20 @@ That is **6 sequential LLM calls**.
 - With **Groq Cloud's LPU (Language Processing Unit)**, models like `openai/gpt-oss-120b` and `qwen/qwen3.8-27b` run at **~300 to 500 tokens/sec**. The same 6 iterations finish in **under 6 seconds**!
 - Best of all: Groq's developer tier is **100% free of cost** with generous daily limits, making it the ideal engine for building real-world autonomous agents.
 
+### 5. Python Primer for Java / Spring Boot Developers
+
+If Python is new to you, here is a mental map translating Python tools to the Java / Spring concepts you already know:
+
+| Java / Spring Boot Concept | Python / Modern Agent Equivalent | Why We Use It |
+| :--- | :--- | :--- |
+| `pom.xml` & Maven dependencies | `pyproject.toml` | Declares project metadata, dependencies (`groq`, `pydantic`), and dev tools (`pytest`, `ruff`). |
+| `.m2` repository / Gradle cache | Python Virtual Environment (`.venv`) | An isolated folder containing only this project's installed Python packages, preventing conflicts with global system Python. |
+| `application.properties` / `@ConfigurationProperties` | Pydantic `BaseSettings` (`SettingsConfigDict(env_file=".env")`) | Strongly validates environment variables at startup and maps them to typed fields with validation errors if missing. |
+| Java Records / Lombok `@Value` | Pydantic `BaseModel` | Immutable, typed data classes with automatic JSON serialization and runtime validation. |
+| Reactive Streams `Flux<String>` / `Iterator<String>` | Python Generators with `yield` | Produces tokens one-by-one in real-time as the LLM streams them across the network without buffering all text into RAM. |
+| `mvn test` & `@Test` | `pytest tests/` | Auto-discovers any file named `test_*.py` and any function named `def test_*()`. |
+| Spotless / Google Java Format | `ruff check .` & `ruff format .` | Extremely fast linter and formatter that enforces PEP 8 style standards automatically. |
+
 ---
 
 ## Official Reference Links
