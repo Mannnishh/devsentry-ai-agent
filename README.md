@@ -18,8 +18,8 @@ Built over a structured 7-day engineering curriculum with zero third-party agent
 
 ```mermaid
 flowchart TD
-    User["Developer / Issue Webhook"] -->|Task prompt & file paths| Agent["DevSentry Agent (ReAct Loop)"]
-    Agent -->|1. Thought: 'Locate failing test'| Tools
+    User["Developer / Issue Webhook"] -->|"Task prompt & file paths"| Agent["DevSentry Agent (ReAct Loop)"]
+    Agent -->|"1. Thought: Locate failing test"| Tools
     subgraph Tools ["Secure Tool Registry"]
         T1["CodeSearch / AST Grep"]
         T2["File Reader & Chunk Inspector"]
@@ -27,14 +27,14 @@ flowchart TD
         T4["Sandboxed Shell / Test Runner"]
         T5["Git Command Runner"]
     end
-    Tools -->|2. Test failure output| Agent
-    Agent -->|3. Thought: 'Fix logic bug'| T3
-    T3 -->|Patch applied| Agent
-    Agent -->|4. Thought: 'Verify with test runner'| T4
-    T4 -->|Tests Pass (Exit 0)| Agent
-    Agent -->|5. Require Approval if safe=false| HITL["Human-In-The-Loop Approval"]
-    HITL -->|Approved| T5
-    T5 -->|Commit to feat/fix branch| Final["Git PR Ready + Diagnostic Report"]
+    Tools -->|"2. Test failure output"| Agent
+    Agent -->|"3. Thought: Fix logic bug"| T3
+    T3 -->|"Patch applied"| Agent
+    Agent -->|"4. Thought: Verify with test runner"| T4
+    T4 -->|"Tests Pass (Exit 0)"| Agent
+    Agent -->|"5. Require Approval if safe=false"| HITL["Human-In-The-Loop Approval"]
+    HITL -->|"Approved"| T5
+    T5 -->|"Commit to feat/fix branch"| Final["Git PR Ready + Diagnostic Report"]
 ```
 
 ---
