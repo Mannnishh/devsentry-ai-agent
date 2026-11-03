@@ -118,7 +118,9 @@ class HITLApprovalGate:
         self.prompt_func = prompt_func or self._default_cli_prompt
 
     def _default_cli_prompt(self, message: str) -> bool:
-        choice = input(f"\n[HITL SAFETY WARNING] {message}\nApprove execution? [y/N]: ").strip().lower()
+        choice = (
+            input(f"\n[HITL SAFETY WARNING] {message}\nApprove execution? [y/N]: ").strip().lower()
+        )
         return choice in ("y", "yes")
 
     def approve(self, action: AgentAction, risk: ToolRisk) -> bool:
@@ -174,18 +176,12 @@ class CycleDetector:
 class HITLApprovalGate:
     """Prompts human operator before executing high-risk actions."""
 
-    def __init__(
-        self, prompt_func: Callable[[str], bool] | None = None
-    ) -> None:
+    def __init__(self, prompt_func: Callable[[str], bool] | None = None) -> None:
         self.prompt_func = prompt_func or self._default_cli_prompt
 
     def _default_cli_prompt(self, message: str) -> bool:
         choice = (
-            input(
-                f"\n[HITL SAFETY WARNING] {message}\nApprove execution? [y/N]: "
-            )
-            .strip()
-            .lower()
+            input(f"\n[HITL SAFETY WARNING] {message}\nApprove execution? [y/N]: ").strip().lower()
         )
         return choice in ("y", "yes")
 

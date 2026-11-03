@@ -156,9 +156,7 @@ class SelfHealingCoordinator:
         obs_lower = observation.lower()
         return any(sig in obs_lower for sig in failure_signals)
 
-    def diagnose_and_repair(
-        self, action: AgentAction, failure_output: str
-    ) -> str:
+    def diagnose_and_repair(self, action: AgentAction, failure_output: str) -> str:
         """# TODO: Generate a diagnosis prompt and call self.llm.generate to produce an actionable diagnosis."""
         raise NotImplementedError("Implement diagnose_and_repair")
 ```
@@ -202,9 +200,7 @@ class SelfHealingCoordinator:
         obs_lower = observation.lower()
         return any(sig in obs_lower for sig in failure_signals)
 
-    def diagnose_and_repair(
-        self, action: AgentAction, failure_output: str
-    ) -> str:
+    def diagnose_and_repair(self, action: AgentAction, failure_output: str) -> str:
         prompt = REFLEXION_PROMPT.format(
             tool_name=action.tool,
             tool_input=action.tool_input,

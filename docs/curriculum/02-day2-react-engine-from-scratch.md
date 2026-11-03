@@ -247,9 +247,7 @@ class ReActParser:
             return AgentAction(tool=tool, tool_input=tool_input, thought=thought)
 
         # Fallback for outputs omitting explicit 'Thought:' prefix
-        fallback_pattern = (
-            r"Action:\s*([a-zA-Z0-9_\-]+)\s*Action Input:\s*(.*)"
-        )
+        fallback_pattern = r"Action:\s*([a-zA-Z0-9_\-]+)\s*Action Input:\s*(.*)"
         match_fallback = re.search(fallback_pattern, text, re.DOTALL)
         if match_fallback:
             tool = match_fallback.group(1).strip()
@@ -340,9 +338,7 @@ class ReActEngine:
     def run(self, question: str) -> str:
         intermediate_steps: list[AgentStep] = []
         tool_names = ", ".join(self.tools.keys())
-        tools_description = "\n".join(
-            [f"- {name}: callable function" for name in self.tools]
-        )
+        tools_description = "\n".join([f"- {name}: callable function" for name in self.tools])
 
         for _ in range(self.max_iterations):
             scratchpad = build_scratchpad(intermediate_steps)
@@ -353,9 +349,7 @@ class ReActEngine:
             )
 
             messages = [{"role": "user", "content": prompt}]
-            raw_response = self.llm.generate(
-                messages, stop=["Observation:"]
-            )
+            raw_response = self.llm.generate(messages, stop=["Observation:"])
 
             parsed = self.parser.parse(raw_response)
 
@@ -370,13 +364,9 @@ class ReActEngine:
                     except Exception as e:
                         observation = f"Error executing {parsed.tool}: {e}"
                 else:
-                    observation = (
-                        f"Error: Tool '{parsed.tool}' not found in [{tool_names}]."
-                    )
+                    observation = f"Error: Tool '{parsed.tool}' not found in [{tool_names}]."
 
-                intermediate_steps.append(
-                    AgentStep(action=parsed, observation=observation)
-                )
+                intermediate_steps.append(AgentStep(action=parsed, observation=observation))
 
         return f"Agent failed to reach final answer within {self.max_iterations} iterations."
 ```
