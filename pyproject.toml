@@ -1,0 +1,33 @@
+[project]
+name = "devsentry"
+version = "0.1.0"
+description = "Autonomous Codebase & DevOps Troubleshotting Agent"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "groq>=0.18.0",             # Official Groq SDK for fast free-tier inference
+    "pydantic>=2.10.0",         # Strongly typed data validation (like Java Records)
+    "pydantic-settings>=2.7.0", # Config validation (like Spring @ConfigurationProperties)
+    "python-dotenv>=1.0.1",     # Loads .env files automatically
+    "rich>=13.9.0",             # Beautiful terminal panels & streaming colors
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.9.0",              # Fast linter and code formatter (like Spotless)
+    "pytest>=8.3.0",            # Automated test runner (like JUnit 5)
+    "pytest-asyncio>=0.25.0",   # Async test support for pytest
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = []
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"

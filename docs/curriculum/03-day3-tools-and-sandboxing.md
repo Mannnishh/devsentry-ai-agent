@@ -244,9 +244,7 @@ from pathlib import Path
 class TestRunnerTool:
     """Executes pytest suites within an isolated workspace directory."""
 
-    def __init__(
-        self, workspace_root: str | Path = ".", timeout_seconds: int = 30
-    ) -> None:
+    def __init__(self, workspace_root: str | Path = ".", timeout_seconds: int = 30) -> None:
         self.workspace_root = Path(workspace_root).resolve()
         self.timeout = timeout_seconds
 
@@ -272,9 +270,7 @@ class TestRunnerTool:
             status = "PASSED" if result.returncode == 0 else "FAILED"
             return f"Test Run [{status}] (Exit code: {result.returncode})\n\n{output}"
         except subprocess.TimeoutExpired:
-            return (
-                f"Error: Test suite execution timed out after {self.timeout}s."
-            )
+            return f"Error: Test suite execution timed out after {self.timeout}s."
         except Exception as e:
             return f"Execution error: {type(e).__name__}: {e}"
 ```

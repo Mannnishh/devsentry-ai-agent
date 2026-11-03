@@ -90,9 +90,7 @@ from src.agent.models import AgentStep
 class ScratchpadManager:
     """Manages agent working memory, enforcing length bounds and truncation."""
 
-    def __init__(
-        self, max_observation_chars: int = 1500, max_recent_steps: int = 5
-    ) -> None:
+    def __init__(self, max_observation_chars: int = 1500, max_recent_steps: int = 5) -> None:
         self.max_obs_chars = max_observation_chars
         self.max_recent_steps = max_recent_steps
 
@@ -225,18 +223,14 @@ class SQLiteSessionStore:
                 )
             """)
 
-    def create_session(
-        self, session_id: str, task: str, status: str = "RUNNING"
-    ) -> None:
+    def create_session(self, session_id: str, task: str, status: str = "RUNNING") -> None:
         with sqlite3.connect(self.db_path) as conn:
             conn.execute(
                 "INSERT OR REPLACE INTO sessions (session_id, task, status) VALUES (?, ?, ?)",
                 (session_id, task, status),
             )
 
-    def save_step(
-        self, session_id: str, step_index: int, step: AgentStep
-    ) -> None:
+    def save_step(self, session_id: str, step_index: int, step: AgentStep) -> None:
         with sqlite3.connect(self.db_path) as conn:
             conn.execute(
                 """
