@@ -37,7 +37,9 @@ class LLMClient:
             temperature=temp,
             **kwargs,
         )
-        return response.choices[0].message.content or ""
+        # Check both content and reasoning:
+        msg = response.choices[0].message
+        return msg.content or getattr(msg, "reasoning", "") or ""
 
     def stream(
         self,
