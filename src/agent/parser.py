@@ -41,7 +41,8 @@ class ReActParser:
             tool_input = match_fallback.group(2).strip()
             return AgentAction(tool=tool, tool_input=tool_input, thought="")
 
-        # 4. Defensive fallback: If model provided its conclusion inside Thought without typing 'Final Answer:'
+        # 4. Defensive fallback: If model provided conclusion inside Thought
+        # without typing 'Final Answer:'
         if text.strip().startswith("Thought:") and "Action:" not in text:
             clean_text = text.replace("Thought:", "").strip()
             return AgentFinish(final_answer=clean_text, thought=text.strip())

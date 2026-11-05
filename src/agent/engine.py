@@ -33,11 +33,11 @@ class ReActEngine:
             scratchpad = build_scratchpad(intermediate_steps)
 
             # 2. Format the system prompt with available tools and current history
-            prompt = (
-                f"{REACT_SYSTEM_PROMPT.format(tools_description=tools_description, tool_names=tool_names)}\n\n"
-                f"Question: {question}\n"
-                f"{scratchpad}"
+            formatted_system = REACT_SYSTEM_PROMPT.format(
+                tools_description=tools_description,
+                tool_names=tool_names,
             )
+            prompt = f"{formatted_system}\n\nQuestion: {question}\n{scratchpad}"
             # 3. Call the LLM with the stop sequence
             messages = [{"role": "user", "content": prompt}]
             raw_response = self.llm.generate(messages, stop=["Observation:"])

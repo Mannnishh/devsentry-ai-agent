@@ -1,7 +1,8 @@
 """Tests for the ReAct parser and execution engine."""
 
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 
 from src.agent.engine import ReActEngine
 from src.agent.models import AgentAction, AgentFinish
