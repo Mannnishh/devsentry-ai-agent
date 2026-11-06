@@ -41,7 +41,7 @@ def test_parser_extracts_action():
 def test_parser_raises_on_invalid_format():
     """Verify parser raises ReActParsingError on unstructured text."""
     parser = ReActParser()
-    raw = "Hello! I am a conversational chatbot and I have no idea about tools."
+    raw = "Action: read_file_without_action_input"
 
     with pytest.raises(ReActParsingError):
         parser.parse(raw)

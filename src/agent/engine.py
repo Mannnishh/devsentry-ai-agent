@@ -28,7 +28,7 @@ class ReActEngine:
         tool_names = ", ".join(self.tools.keys())
         tools_description = "\n".join([f"- {name}: callable function" for name in self.tools])
 
-        for _ in range(self.max_iterations):
+        for iteration in range(self.max_iterations):
             # 1. Build the dynamic scratchpad from past steps
             scratchpad = build_scratchpad(intermediate_steps)
 
@@ -47,10 +47,13 @@ class ReActEngine:
 
             # 5. Check if the task is finished
             if isinstance(parsed, AgentFinish):
+                print(f"[Step {iteration + 1}] Finished task!")
                 return parsed.final_answer
 
             # 6. Execute the requested tool
             if isinstance(parsed, AgentAction):
+                print(f"[Step {iteration + 1}] Thought: {parsed.thought[:100]}")
+                print(f"[Step {iteration + 1}] Action: {parsed.tool}('{parsed.tool_input}')")
                 tool_func = self.tools.get(parsed.tool)
                 if tool_func:
                     try:
