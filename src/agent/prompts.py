@@ -23,8 +23,10 @@ REACT_SYSTEM_PROMPT = """You are DevSentry, an autonomous software engineering a
     RULES:
     1. Always begin with a "Thought:".
     2. Only output ONE Action and ONE Action Input per step.
-    3. After "Action Input:", STOP generating and wait for the Observation.
-    4. When you have enough information, you MUST output "Final Answer:" with the answer.
+    3. Use ONLY tool names from [{tool_names}]. Never invoke internal functions like repo_browser.
+    4. Output PLAIN TEXT ONLY. Never output JSON objects or code blocks for tool calls.
+    5. After "Action Input:", STOP generating and wait for the Observation.
+    6. When you have enough information, you MUST output "Final Answer:" with the answer.
     """
 
 
