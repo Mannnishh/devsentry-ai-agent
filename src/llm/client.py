@@ -1,11 +1,13 @@
 """Provider-agnostic LLM client implementation using Groq."""
 
+import json
 from collections.abc import Generator
 from typing import Any
 
-from groq import Groq
+from groq import BadRequestError, Groq
 
 from src.config import settings
+from src.resilience.backoff import retry_with_jitter
 
 
 class LLMClient:
@@ -20,6 +22,7 @@ class LLMClient:
         self.default_model = default_model or settings.default_model
         self._client = Groq(api_key=self.api_key)
 
+    @retry_with_jitter(max_retries=3, base_delay=0.5, max_delay=5.0)
     def generate(
         self,
         messages: list[dict[str, str]],
@@ -27,19 +30,42 @@ class LLMClient:
         temperature: float | None = None,
         **kwargs: Any,
     ) -> str:
-        """Generate a complete text response synchronously (waits for full answer)."""
+        """Generate a complete text response synchronously with automatic retry on errors."""
         selected_model = model or self.default_model
         temp = temperature if temperature is not None else settings.llm_temperature
 
-        response = self._client.chat.completions.create(
-            model=selected_model,
-            messages=messages,  # type: ignore[arg-type]
-            temperature=temp,
-            **kwargs,
-        )
-        # Check both content and reasoning:
-        msg = response.choices[0].message
-        return msg.content or getattr(msg, "reasoning", "") or ""
+        try:
+            response = self._client.chat.completions.create(
+                model=selected_model,
+                messages=messages,  # type: ignore[arg-type]
+                temperature=temp,
+                **kwargs,
+            )
+            msg = response.choices[0].message
+            return msg.content or getattr(msg, "reasoning", "") or ""
+        except BadRequestError as err:
+            # Defensive recovery: if model emitted JSON tool call, extract and convert to ReAct
+            err_body = getattr(err, "body", {})
+            if isinstance(err_body, dict):
+                error_info = err_body.get("error", {})
+                failed_gen = error_info.get("failed_generation")
+                if failed_gen:
+                    try:
+                        data = json.loads(failed_gen)
+                        raw_name = data.get("name", "")
+                        func_name = raw_name.split(".")[-1]
+                        args = data.get("arguments", {})
+                        arg_val = (
+                            next(iter(args.values())) if isinstance(args, dict) and args else ""
+                        )
+                        return (
+                            f"Thought: Executing tool {func_name}.\n"
+                            f"Action: {func_name}\n"
+                            f"Action Input: {arg_val}"
+                        )
+                    except Exception:
+                        pass
+            raise err
 
     def stream(
         self,

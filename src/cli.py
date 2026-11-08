@@ -7,6 +7,7 @@ from rich.console import Console
 from rich.panel import Panel
 
 from src.agent.engine import ReActEngine
+from src.agent.reflection import SelfHealingCoordinator
 from src.llm.client import LLMClient
 from src.memory.scratchpad import ScratchpadManager
 from src.memory.storage import SQLiteSessionStore
@@ -68,7 +69,7 @@ def main() -> None:
         Panel(
             f"[bold cyan]Task:[/bold cyan] {prompt}\n"
             f"[bold magenta]Session ID:[/bold magenta] {session_id}",
-            title="DevSentry Day 4 Checkpoint",
+            title="DevSentry Day 5 Checkpoint",
         )
     )
 
@@ -76,6 +77,7 @@ def main() -> None:
     client = LLMClient()
     session_store = SQLiteSessionStore("data/devsentry.db")
     scratchpad_manager = ScratchpadManager(max_observation_chars=1200, max_recent_steps=4)
+    self_healing = SelfHealingCoordinator(client)
 
     engine = ReActEngine(
         llm_client=client,
@@ -83,6 +85,7 @@ def main() -> None:
         max_iterations=8,
         scratchpad_manager=scratchpad_manager,
         session_store=session_store,
+        self_healing=self_healing,
     )
 
     console.print("\n[bold yellow]Agent Running (Inspecting Codebase via Tools)...[/bold yellow]")

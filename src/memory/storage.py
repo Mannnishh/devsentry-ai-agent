@@ -27,7 +27,7 @@ class SQLiteSessionStore:
             """)
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS checkpoints (
-                    if INTEGER PRIMARY KEY AUTOINCREMENT,
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
                     session_id TEXT NOT NULL,
                     step_index INTEGER NOT NULL,
                     thought TEXT,

@@ -5,6 +5,7 @@ from collections.abc import Callable
 from src.agent.models import AgentAction, AgentFinish, AgentStep
 from src.agent.parser import ReActParser
 from src.agent.prompts import REACT_SYSTEM_PROMPT
+from src.agent.reflection import SelfHealingCoordinator
 from src.llm.client import LLMClient
 from src.memory.scratchpad import ScratchpadManager
 from src.memory.storage import SQLiteSessionStore
@@ -20,6 +21,7 @@ class ReActEngine:
         max_iterations: int = 5,
         scratchpad_manager: ScratchpadManager | None = None,
         session_store: SQLiteSessionStore | None = None,
+        self_healing: SelfHealingCoordinator | None = None,
     ):
         self.llm = llm_client
         self.tools = tools
@@ -27,6 +29,7 @@ class ReActEngine:
         self.parser = ReActParser()
         self.scratchpad_manager = scratchpad_manager or ScratchpadManager()
         self.session_store = session_store
+        self.self_healing = self_healing
 
     def run(self, question: str, session_id: str | None = None) -> str:
         """Run the ReAct loop until completion or max iterations reached."""
@@ -75,7 +78,16 @@ class ReActEngine:
                 else:
                     observation = f"Error: Tool '{parsed.tool}' not found in [{tool_names}]."
 
-            # 7. Record the completed step into working memory & persistent store
+                # 7. Self-Healing Reflexion loop if an error or failure was returned
+                if self.self_healing and self.self_healing.is_failure(observation):
+                    print(f"[Step {iteration + 1}] ⚠️ Failure detected. Initiating Reflexion...")
+                    try:
+                        diagnosis = self.self_healing.diagnose_and_repair(parsed, observation)
+                        observation += f"\n[Reflexion Self-Correction Plan]:\n{diagnosis}"
+                    except Exception as e:
+                        print(f"[Step {iteration + 1}] Reflexion failed: {e}")
+
+            # 8. Record the completed step into working memory & persistent store
             step = AgentStep(action=parsed, observation=observation)
             intermediate_steps.append(step)
 
