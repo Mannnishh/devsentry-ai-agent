@@ -4,6 +4,8 @@ from collections.abc import Callable
 
 from pydantic import BaseModel, Field
 
+from src.safety.guardrails import ToolRisk
+
 
 class Tool(BaseModel):
     """Represents a callable tool exposed to the AI agent."""
@@ -11,6 +13,7 @@ class Tool(BaseModel):
     name: str = Field(description="unique tool identifier, e.g. 'read_file'")
     description: str = Field("Instruction for the LLM on when and how to call this tool")
     func: Callable[[str], str] = Field(description="The underlying Python function to execute")
+    risk: ToolRisk = Field(default=ToolRisk.SAFE, description="Safety tier: SAFE or HIGH")
 
     def execute(self, argument: str) -> str:
         """Safely execute the tool and catch any runtime exceptions."""
@@ -45,3 +48,8 @@ class ToolRegistry:
     def get_names(self) -> str:
         """Get comma-separated tool names for prompt formatting"""
         return ", ".join(self._tools.keys())
+
+    def get_risk(self, name: str) -> ToolRisk:
+        """Return the risk tier for a tool (defaults to HIGH if unknown)."""
+        tool = self._tools.get(name)
+        return tool.risk if tool else ToolRisk.HIGH
