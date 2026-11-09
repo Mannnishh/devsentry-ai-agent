@@ -9,6 +9,12 @@ from src.agent.reflection import SelfHealingCoordinator
 from src.llm.client import LLMClient
 from src.memory.scratchpad import ScratchpadManager
 from src.memory.storage import SQLiteSessionStore
+from src.safety.guardrails import (
+    CycleDetectionError,
+    CycleDetector,
+    HITLApprovalGate,
+    ToolRisk,
+)
 
 
 class ReActEngine:
@@ -22,6 +28,9 @@ class ReActEngine:
         scratchpad_manager: ScratchpadManager | None = None,
         session_store: SQLiteSessionStore | None = None,
         self_healing: SelfHealingCoordinator | None = None,
+        cycle_detector: CycleDetector | None = None,
+        hitl_gate: HITLApprovalGate | None = None,
+        tool_risk_lookup: Callable[[str], ToolRisk] | None = None,
     ):
         self.llm = llm_client
         self.tools = tools
@@ -30,6 +39,9 @@ class ReActEngine:
         self.scratchpad_manager = scratchpad_manager or ScratchpadManager()
         self.session_store = session_store
         self.self_healing = self_healing
+        self.cycle_detector = cycle_detector or CycleDetector()
+        self.hitl_gate = hitl_gate
+        self.tool_risk_lookup = tool_risk_lookup
 
     def run(self, question: str, session_id: str | None = None) -> str:
         """Run the ReAct loop until completion or max iterations reached."""
@@ -69,14 +81,38 @@ class ReActEngine:
             if isinstance(parsed, AgentAction):
                 print(f"[Step {iteration + 1}] Thought: {parsed.thought[:100]}")
                 print(f"[Step {iteration + 1}] Action: {parsed.tool}('{parsed.tool_input}')")
-                tool_func = self.tools.get(parsed.tool)
-                if tool_func:
-                    try:
-                        observation = str(tool_func(parsed.tool_input))
-                    except Exception as e:
-                        observation = f"Error executing {parsed.tool}: {e}"
+
+                # <--- GUARDRAIL 1: Cycle Detection (Infinite loop prevention)
+                try:
+                    self.cycle_detector.check(parsed)
+                except CycleDetectionError as e:
+                    print(f"[Step {iteration + 1}] 🛑 {e}")
+                    observation = f"Safety Error: {e}"
+                    step = AgentStep(action=parsed, observation=observation)
+                    intermediate_steps.append(step)
+                    return f"Terminated by Safety Guardrail: {e}"
+
+                # <--- GUARDRAIL 2: Human-in-the-Loop Approval Gate for HIGH risk tools
+                is_approved = True
+                if self.hitl_gate and self.tool_risk_lookup:
+                    risk = self.tool_risk_lookup(parsed.tool)
+                    is_approved = self.hitl_gate.approve(parsed, risk)
+
+                if not is_approved:
+                    print(f"[Step {iteration + 1}] ⛔ Execution REJECTED by operator.")
+                    observation = (
+                        f"Execution of tool '{parsed.tool}' was REJECTED by human operator. "
+                        f"Formulate an alternative plan."
+                    )
                 else:
-                    observation = f"Error: Tool '{parsed.tool}' not found in [{tool_names}]."
+                    tool_func = self.tools.get(parsed.tool)
+                    if tool_func:
+                        try:
+                            observation = str(tool_func(parsed.tool_input))
+                        except Exception as e:
+                            observation = f"Error executing {parsed.tool}: {e}"
+                    else:
+                        observation = f"Error: Tool '{parsed.tool}' not found in [{tool_names}]."
 
                 # 7. Self-Healing Reflexion loop if an error or failure was returned
                 if self.self_healing and self.self_healing.is_failure(observation):

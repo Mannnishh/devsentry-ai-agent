@@ -11,6 +11,7 @@ from src.agent.reflection import SelfHealingCoordinator
 from src.llm.client import LLMClient
 from src.memory.scratchpad import ScratchpadManager
 from src.memory.storage import SQLiteSessionStore
+from src.safety.guardrails import HITLApprovalGate, ToolRisk
 from src.tools.base import Tool, ToolRegistry
 from src.tools.filesystem import SafeFileSystem
 from src.tools.test_runner import TestRunnerTool
@@ -36,6 +37,7 @@ def build_tool_registry() -> ToolRegistry:
             name="write_file",
             description="Writes text content to a file. Input format MUST be 'path:::content'.",
             func=fs.write_file,
+            risk=ToolRisk.HIGH,
         )
     )
     registry.register(
@@ -69,7 +71,7 @@ def main() -> None:
         Panel(
             f"[bold cyan]Task:[/bold cyan] {prompt}\n"
             f"[bold magenta]Session ID:[/bold magenta] {session_id}",
-            title="DevSentry Day 5 Checkpoint",
+            title="DevSentry Day 6 Checkpoint",
         )
     )
 
@@ -78,6 +80,7 @@ def main() -> None:
     session_store = SQLiteSessionStore("data/devsentry.db")
     scratchpad_manager = ScratchpadManager(max_observation_chars=1200, max_recent_steps=4)
     self_healing = SelfHealingCoordinator(client)
+    hitl_gate = HITLApprovalGate()
 
     engine = ReActEngine(
         llm_client=client,
@@ -86,6 +89,8 @@ def main() -> None:
         scratchpad_manager=scratchpad_manager,
         session_store=session_store,
         self_healing=self_healing,
+        hitl_gate=hitl_gate,
+        tool_risk_lookup=registry.get_risk,
     )
 
     console.print("\n[bold yellow]Agent Running (Inspecting Codebase via Tools)...[/bold yellow]")
